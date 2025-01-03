@@ -30,7 +30,7 @@
       "script": "builder/frameworks/zephyr.py"
     },
     "arduino": {
-      "package": "framework-arduino",
+      "package": "framework-arduino-silabs",
       "script": "builder/frameworks/arduino.py"
     }
   },
@@ -43,7 +43,7 @@
     "framework-arduino-silabs": {
       "type": "framework",
       "optional": true,
-      "version": "https://github.com/SiliconLabs/arduino.git"
+      "version": "https://github.com/maxgerhardt/silabs-arduino.git"
     },
     "framework-mbed": {
       "type": "framework",

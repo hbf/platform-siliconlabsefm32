@@ -9,6 +9,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         example:
+          - "examples/arduino-blink"
           - "examples/mbed-rtos-blink-baremetal"
           - "examples/mbed-rtos-semaphore"
           - "examples/mbed-rtos-usb-cdc"
