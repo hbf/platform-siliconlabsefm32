@@ -8,7 +8,7 @@ How to build PlatformIO based project
 
 ```shell
 # Change directory to example
-$ cd platform-siliconlabsefm32/examples/mbed-blink-baremetal
+$ cd platform-siliconlabsefm32/examples/arduino-blink
 
 # Build project
 $ pio run
@@ -17,10 +17,10 @@ $ pio run
 $ pio run --target upload
 
 # Build specific environment
-$ pio run -e efm32gg_stk3700
+$ pio run -e sparkfun_thingplusmatter
 
 # Upload firmware for the specific environment
-$ pio run -e efm32gg_stk3700 --target upload
+$ pio run -e sparkfun_thingplusmatter --target upload
 
 # Clean build files
 $ pio run --target clean
