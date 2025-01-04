@@ -10,6 +10,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         example:
           - "examples/arduino-blink"
+          - "examples/arduino-matter-lightbulb"
           - "examples/mbed-rtos-blink-baremetal"
           - "examples/mbed-rtos-semaphore"
           - "examples/mbed-rtos-usb-cdc"
