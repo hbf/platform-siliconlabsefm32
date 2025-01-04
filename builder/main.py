@@ -94,9 +94,11 @@ target_elf = None
 if "nobuild" in COMMAND_LINE_TARGETS:
     target_elf = join("$BUILD_DIR", "${PROGNAME}.elf")
     target_firm = join("$BUILD_DIR", "${PROGNAME}.bin")
+    target_hex = join("$BUILD_DIR", "${PROGNAME}.hex")
 else:
     target_elf = env.BuildProgram()
     target_firm = env.ElfToBin(join("$BUILD_DIR", "${PROGNAME}"), target_elf)
+    target_hex = env.ElfToHex(join("$BUILD_DIR", "${PROGNAME}"), target_elf)
     env.Depends(target_firm, "checkprogsize")
 
 AlwaysBuild(env.Alias("nobuild", target_firm))
@@ -199,7 +201,7 @@ elif upload_protocol.startswith("simplicitycommander"):
         ],
         UPLOADCMD="$UPLOADER $UPLOADERFLAGS flash $SOURCE --identifybyserialport $UPLOAD_PORT"
     )
-    upload_source = target_elf
+    upload_source = target_hex
     upload_actions = [
         env.VerboseAction(env.AutodetectUploadPort, "Looking for upload port..."),
         env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")
