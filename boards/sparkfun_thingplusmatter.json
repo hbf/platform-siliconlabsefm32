@@ -12,11 +12,11 @@
     "zigbee"
   ],
   "debug": {
-    "jlink_device": "EFR32MG24B020F1536IM40",
+    "jlink_device": "MGM240PB32VNA",
     "onboard_tools": [
       "jlink"
     ],
-    "svd_path": "EFR32MG24B020F1536IM40.svd",
+    "svd_path": "MGM240PB32VNA.svd",
     "openocd_target": "efm32s2_g23.cfg"
   },
   "frameworks": [
