@@ -16,7 +16,8 @@
     "onboard_tools": [
       "jlink"
     ],
-    "svd_path": "EFR32MG24B020F1536IM40.svd"
+    "svd_path": "EFR32MG24B020F1536IM40.svd",
+    "openocd_target": "efm32s2_g23.cfg"
   },
   "frameworks": [
     "arduino"
@@ -25,7 +26,11 @@
   "upload": {
     "maximum_ram_size": 262144,
     "maximum_size": 1572864,
-    "protocol": "jlink"
+    "protocol": "cmsis-dap",
+    "protocols": [
+      "jlink",
+      "cmsis-dap"
+    ]
   },
   "url": "https://www.sparkfun.com/products/20270",
   "vendor": "Sparkfun"

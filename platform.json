@@ -63,6 +63,12 @@
       "owner": "platformio",
       "version": "^1.63208.0"
     },
+    "tool-openocd-silabs": {
+      "type": "uploader",
+      "optional": true,
+      "owner": "maxgerhardt",
+      "version": "https://github.com/maxgerhardt/tool-openocd-silabs.git#windows_x64"
+    },
     "tool-cmake": {
       "optional": true,
       "owner": "platformio",
