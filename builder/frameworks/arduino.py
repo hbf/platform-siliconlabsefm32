@@ -129,7 +129,7 @@ env.Append(
         ("SL_BOARD_REV", env.StringifyMacro("A00")),
         ("configNUM_SDK_THREAD_LOCAL_STORAGE_POINTERS", 2),
         ("SL_COMPONENT_CATALOG_PRESENT", 1),
-        ("MBEDTLS_CONFIG_FILE", "<sl_mbedtls_config.h>"),
+        ("MBEDTLS_CONFIG_FILE", env.StringifyMacro("sl_mbedtls_config.h")),
         ("OPENTHREAD_CONFIG_ENABLE_BUILTIN_MBEDTLS", 0),
         ("RADIO_CONFIG_DMP_SUPPORT", 1),
         ("OPENTHREAD_CORE_CONFIG_PLATFORM_CHECK_FILE", env.StringifyMacro("openthread-core-efr32-config-check.h")),
