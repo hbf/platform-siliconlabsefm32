@@ -34,143 +34,34 @@ machine_flags = [
     "-mfpu=fpv5-sp-d16",
     "-mfloat-abi=hard",
     "-mcmse",
- ]
+]
 
-env.Append(
-    ASFLAGS=[],
-    ASPPFLAGS=[
-        "-x", "assembler-with-cpp",
-    ],
+# check what stack is wanted
+wanted_stack = "matter"
+stack_includes = []
+stack_linkerscript = ""
+stack_libs = []
 
-    CFLAGS=[
-        "-std=gnu11",
-    ],
+# load generic extra flags from board
+env.ProcessFlags(board.get("build.arduino.extra_flags", ""))
 
-    CCFLAGS=machine_flags + [
-        "-Os",  # optimize for size
-        "-Wall",  # show warnings
-        "-ffunction-sections",  # place each function in its own section
-        "-fdata-sections",
-        "-fomit-frame-pointer",
-        "-imacros",
-        "sl_gcc_preinclude.h",
-        "-Wno-deprecated-declarations",
-        "-Wno-maybe-uninitialized",
-        "-Wno-missing-field-initializers",
-        "-Wno-unused-parameter",
-        "-Wno-cast-function-type",
-        "-Wno-psabi",
-        "-fno-strict-aliasing",
-        "-fno-unwind-tables",
-        "-fno-asynchronous-unwind-tables",
-        "-fno-common",
-        "-Wno-sign-compare"
-    ],
+cpp_defines = env.Flatten(env.get("CPPDEFINES", []))
+if "PIO_FRAMEWORK_ARDUINO_STACK_MATTER" in cpp_defines:
+    wanted_stack = "matter"
+elif "PIO_FRAMEWORK_ARDUINO_STACK_NONE" in cpp_defines:
+    wanted_stack = "none"
+elif "PIO_FRAMEWORK_ARDUINO_STACK_BLE_ARDUINO" in cpp_defines:
+    wanted_stack = "ble_arduino"
+elif "PIO_FRAMEWORK_ARDUINO_STACK_BLE_SILABS" in cpp_defines:
+    wanted_stack = "ble_silabs"
 
-    CXXFLAGS=[
-        "-std=gnu++17",
-        "-fno-exceptions",
-    ],
-
-    LINKFLAGS=machine_flags + [
-        "-Os",
-        "--specs=nano.specs",
-        "--specs=nosys.specs",
-        "-Wl,--wrap=malloc",
-        "-Wl,--wrap=free",
-        "-Wl,--wrap=realloc",
-        "-Wl,--wrap=calloc",
-        "-Wl,--wrap=MemoryAlloc",
-        "-Wl,--wrap=_malloc_r",
-        "-Wl,--wrap=_realloc_r",
-        "-Wl,--wrap=_free_r",
-        "-Wl,--wrap=_calloc_r",
-        "-Wl,--gc-sections",
-        "-Wl,--no-warn-rwx-segments",
-        '-Wl,-Map="%s"' % join("${BUILD_DIR}", "${PROGNAME}.map"),
-    ],
-
-    CPPDEFINES=[
-        ("F_CPU", "$BOARD_F_CPU"),
-        ("ARDUINO", 10808),
-        ("ARDUINO_SILABS", env.StringifyMacro("2.2.0")),
-        "ARDUINO_ARCH_SILABS",
-
-        # variant specific macros (example: thingplusmatter)
-        ("NUM_LEDS", 1),
-        ("NUM_HW_SERIAL", 2),
-        ("NUM_HW_SPI", 2),
-        ("NUM_HW_I2C", 1),
-        ("NUM_DAC_HW", 2),
-        ("ARDUINO_MAIN_TASK_STACK_SIZE", 2048),
-        "ARDUINO_MATTER", # stack type
-        ("CHIP_CRYPTO_PLATFORM", 1),
-        ("IS_DEMO_LIGHT", 1),
-        ("NVM3_DEFAULT_MAX_OBJECT_SIZE", 4092),
-        ("NVM3_DEFAULT_NVM_SIZE", 40960),
-        ("OPENTHREAD_CONFIG_LOG_OUTPUT", "OPENTHREAD_CONFIG_LOG_OUTPUT_APP"),
-        ("SL_STATUS_LED", 0),
-        ("_WANT_REENT_SMALL", 1),
-        ("CHIP_ADDRESS_RESOLVE_IMPL_INCLUDE_HEADER", env.StringifyMacro("lib/address_resolve/AddressResolve_DefaultImpl.h")),
-        ("CHIP_HAVE_CONFIG_H", 1),
-        ("CURRENT_TIME_NOT_IMPLEMENTED", 1),
-        ("SILABS_OTA_ENABLED", 1),
-        ("RTT_USE_ASM", 0),
-        ("OPENTHREAD_CONFIG_CLI_TRANSPORT", "OT_CLI_TRANSPORT_CONSOLE"),
-        ("CONFIG_ENABLE_EUART", 1),
-        ("MGM24", 1),
-        ("ENABLE_WSTK_LEDS", 1),
-        ("MGM240PB32VNA", 1),
-        ("SL_APP_PROPERTIES", 1),
-        ("HARDWARE_BOARD_DEFAULT_RF_BAND_2400", 1),
-        ("HARDWARE_BOARD_SUPPORTS_1_RF_BAND", 1),
-        ("HARDWARE_BOARD_SUPPORTS_RF_BAND_2400", 1),
-        ("SL_BOARD_NAME", env.StringifyMacro("BRD2704A")),
-        ("SL_BOARD_REV", env.StringifyMacro("A00")),
-        ("configNUM_SDK_THREAD_LOCAL_STORAGE_POINTERS", 2),
-        ("SL_COMPONENT_CATALOG_PRESENT", 1),
-        ("MBEDTLS_CONFIG_FILE", env.StringifyMacro("sl_mbedtls_config.h")),
-        ("OPENTHREAD_CONFIG_ENABLE_BUILTIN_MBEDTLS", 0),
-        ("RADIO_CONFIG_DMP_SUPPORT", 1),
-        ("OPENTHREAD_CORE_CONFIG_PLATFORM_CHECK_FILE", env.StringifyMacro("openthread-core-efr32-config-check.h")),
-        ("OPENTHREAD_PROJECT_CORE_CONFIG_FILE", env.StringifyMacro("openthread-core-efr32-config.h")),
-        ("OPENTHREAD_CONFIG_FILE", env.StringifyMacro("sl_openthread_generic_config.h")),
-        ("OPENTHREAD_FTD", 1),
-        ("SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE", env.StringifyMacro("sl_openthread_features_config.h")),
-        ("BUFFER_SIZE_DOWN", 0),
-        ("BUFFER_SIZE_UP", 768),
-        ("MBEDTLS_PSA_CRYPTO_CONFIG_FILE", env.StringifyMacro("psa_crypto_config.h")),
-        ("SL_RAIL_LIB_MULTIPROTOCOL_SUPPORT", 1),
-        ("SL_RAIL_UTIL_PA_CONFIG_HEADER", env.StringifyMacro("sl_rail_util_pa_config.h")),
-        ("SL_OPENTHREAD_CUSTOM_CLI_ENABLE", 1),
-        ("SLI_RADIOAES_REQUIRES_MASKING", 1),
-        ("configNUM_USER_THREAD_LOCAL_STORAGE_POINTERS", 0),
-        ("configNUM_THREAD_LOCAL_STORAGE_POINTERS", 2),
-    ],
-
-    LIBS=[
-        "stdc++",
-        "gcc",
-        "c",
-        "m",
-        # todo all these paths depend on the selected stack, too
-        File(join(VARIANT_DIR, "matter", "gsdk.a")), # gsk
-        File(join(VARIANT_DIR, "matter", "libbgcommon_efr32xg24_gcc_release.a")),
-        File(join(VARIANT_DIR, "matter", "libbluetooth_controller_efr32xg24_gcc_release.a")),
-        File(join(VARIANT_DIR, "matter", "libbluetooth_host_efr32xg24_gcc_release.a")),
-        File(join(VARIANT_DIR, "matter", "libnvm3_CM33_gcc.a")),
-        File(join(VARIANT_DIR, "matter", "librail_config_mgm240pb32vna_gcc.a")),
-        File(join(VARIANT_DIR, "matter", "librail_multiprotocol_module_efr32xg24_gcc_release.a")),
-        File(join(VARIANT_DIR, "matter", "libsl_openthread_efr32mg2x_gcc.a")),
-    ],
-
-    LIBSOURCE_DIRS=[
-        join(FRAMEWORK_DIR, "libraries")
-    ],
-
-    CPPPATH=[
-        join(FRAMEWORK_DIR, "cores", "silabs"),
-        join(FRAMEWORK_DIR, "cores", "silabs", "api", "deprecated"),
+if wanted_stack == "matter":
+    stack_linkerscript = join(VARIANT_DIR, "matter", "linkerfile.ld")
+    env.ProcessFlags(board.get("build.arduino.matter_flags", ""))
+    stack_libs.append(File(join(VARIANT_DIR, "matter", "gsdk.a")))
+    stack_libs.extend([File(join(VARIANT_DIR, "matter", lib)) for lib in board.get("build.arduino.matter_libs", "").split(" ")])
+    # matter include directories are the same for all variants, no need to store them in the board file
+    stack_includes = [
         join(VARIANT_DIR, "matter"),
         join(VARIANT_DIR, "matter", "autogen", "zap-generated"),
         join(VARIANT_DIR, "matter", "autogen", "zap-generated", "app"),
@@ -275,6 +166,84 @@ env.Append(
         join(VARIANT_DIR, "matter", "gecko_sdk_4.4.0", "platform", "emdrv", "spidrv", "inc"),
         join(VARIANT_DIR, "matter", "gecko_sdk_4.4.0", "platform", "service", "udelay", "inc"),
     ]
+
+
+env.Append(
+    ASFLAGS=[],
+    ASPPFLAGS=[
+        "-x", "assembler-with-cpp",
+    ],
+
+    CFLAGS=[
+        "-std=gnu11",
+    ],
+
+    CCFLAGS=machine_flags + [
+        "-Os",  # optimize for size
+        "-Wall",  # show warnings
+        "-ffunction-sections",  # place each function in its own section
+        "-fdata-sections",
+        "-fomit-frame-pointer",
+        "-imacros",
+        "sl_gcc_preinclude.h",
+        "-Wno-deprecated-declarations",
+        "-Wno-maybe-uninitialized",
+        "-Wno-missing-field-initializers",
+        "-Wno-unused-parameter",
+        "-Wno-cast-function-type",
+        "-Wno-psabi",
+        "-fno-strict-aliasing",
+        "-fno-unwind-tables",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-common",
+        "-Wno-sign-compare"
+    ],
+
+    CXXFLAGS=[
+        "-std=gnu++17",
+        "-fno-exceptions",
+    ],
+
+    LINKFLAGS=machine_flags + [
+        "-Os",
+        "--specs=nano.specs",
+        "--specs=nosys.specs",
+        "-Wl,--wrap=malloc",
+        "-Wl,--wrap=free",
+        "-Wl,--wrap=realloc",
+        "-Wl,--wrap=calloc",
+        "-Wl,--wrap=MemoryAlloc",
+        "-Wl,--wrap=_malloc_r",
+        "-Wl,--wrap=_realloc_r",
+        "-Wl,--wrap=_free_r",
+        "-Wl,--wrap=_calloc_r",
+        "-Wl,--gc-sections",
+        "-Wl,--no-warn-rwx-segments",
+        '-Wl,-Map="%s"' % join("${BUILD_DIR}", "${PROGNAME}.map"),
+    ],
+
+    CPPDEFINES=[
+        ("F_CPU", "$BOARD_F_CPU"),
+        ("ARDUINO", 10808),
+        ("ARDUINO_SILABS", env.StringifyMacro("2.2.0")),
+        "ARDUINO_ARCH_SILABS",
+    ],
+
+    LIBS=[
+        "stdc++",
+        "gcc",
+        "c",
+        "m",
+    ] + stack_libs,
+
+    LIBSOURCE_DIRS=[
+        join(FRAMEWORK_DIR, "libraries")
+    ],
+
+    CPPPATH=[
+        join(FRAMEWORK_DIR, "cores", "silabs"),
+        join(FRAMEWORK_DIR, "cores", "silabs", "api", "deprecated"),
+    ] + stack_includes
 )
 
 # Framework requires all symbols from mbed libraries
@@ -282,8 +251,7 @@ env.Append(
 #env.Append(_LIBFLAGS=" -Wl,--no-whole-archive -lstdc++ -lm -lc -lgcc -lnosys")
 
 if not board.get("build.ldscript", ""):
-    # ToDo make this depend on the currently selectd stack (noradio, ble_arduino, ble_silabs, matter)
-    env.Replace(LDSCRIPT_PATH=join(VARIANT_DIR, "matter", "linkerfile.ld"))
+    env.Replace(LDSCRIPT_PATH=stack_linkerscript)
 
 #
 # Target: Build Core Library
