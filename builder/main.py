@@ -117,6 +117,7 @@ AlwaysBuild(target_size)
 
 upload_protocol = env.subst("$UPLOAD_PROTOCOL")
 debug_tools = env.BoardConfig().get("debug.tools", {})
+upload_source = target_firm
 upload_actions = []
 
 if upload_protocol == "mbed":
@@ -153,16 +154,20 @@ elif upload_protocol.startswith("jlink"):
         if not isdir(build_dir):
             makedirs(build_dir)
         script_path = join(build_dir, "upload.jlink")
+        auto_addr = env.BoardConfig().get("upload.offset_address", "") == ""
         commands = [
             "h",
-            "loadbin %s, %s" % (source, env.BoardConfig().get(
-                "upload.offset_address", "0x0")),
+            "loadfile %s" % (source if auto_addr else (source + " " + env.BoardConfig().get(
+                "upload.offset_address"))),
             "r",
             "q"
         ]
         with open(script_path, "w") as fp:
             fp.write("\n".join(commands))
         return script_path
+
+    if not board.get("upload").get("offset_address"):
+        upload_source = target_elf
 
     env.Replace(
         __jlink_cmd_script=_jlink_cmd_script,
@@ -235,7 +240,7 @@ elif upload_protocol == "custom":
 else:
     sys.stderr.write("Warning! Unknown upload protocol %s\n" % upload_protocol)
 
-AlwaysBuild(env.Alias("upload", target_firm, upload_actions))
+AlwaysBuild(env.Alias("upload", upload_source, upload_actions))
 
 #
 # Default targets
