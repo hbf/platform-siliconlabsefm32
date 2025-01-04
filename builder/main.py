@@ -16,6 +16,7 @@ import sys
 from platform import system
 from os import makedirs
 from os.path import isdir, join
+from platformio import util
 
 from SCons.Script import (ARGUMENTS, COMMAND_LINE_TARGETS, AlwaysBuild,
                           Builder, Default, DefaultEnvironment)
@@ -176,6 +177,28 @@ elif upload_protocol.startswith("jlink"):
         UPLOADCMD='$UPLOADER $UPLOADERFLAGS -CommanderScript "${__jlink_cmd_script(__env__, SOURCE)}"'
     )
     upload_actions = [env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")]
+
+elif upload_protocol.startswith("simplicitycommander"):
+    commander_path = platform.get_package_dir("tool-simplicitycommander") or ""
+    sys_type = str(util.get_systype())
+    if sys_type.startswith("windows"):
+        commander_path = join(commander_path, "commander.exe")
+    elif sys_type.startswith("darwin"):
+        commander_path = join(commander_path, "Commander.app", "Contents", "MacOS", "commander")
+    else: # Linux, ...
+        commander_path = join(commander_path, "commander")
+    env.Replace(
+        COMMANDERPATH=commander_path,
+        UPLOADER="$COMMANDERPATH",
+        UPLOADERFLAGS=[
+        ],
+        UPLOADCMD="$UPLOADER $UPLOADERFLAGS flash $BUILD_DIR/${PROGNAME}.elf --identifybyserialport $UPLOAD_PORT"
+    )
+    upload_source = target_elf
+    upload_actions = [
+        env.VerboseAction(env.AutodetectUploadPort, "Looking for upload port..."),
+        env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")
+    ]
 
 elif upload_protocol in debug_tools:
     openocd_args = [

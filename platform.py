@@ -32,8 +32,19 @@ class Siliconlabsefm32Platform(PlatformBase):
         "linux_x86_64": "https://github.com/maxgerhardt/tool-openocd-silabs.git#linux_x64",
         # no other linux builds
         # Mac (Intel and ARM are separate)
-        "darwin_x86_64": "https://github.com/maxgerhardt/tool-openocd-silabs.git#linux_x64#mac",
-        "darwin_arm64": "https://github.com/maxgerhardt/tool-openocd-silabs.git#linux_x64#mac"
+        "darwin_x86_64": "https://github.com/maxgerhardt/tool-openocd-silabs.git#mac",
+        "darwin_arm64": "https://github.com/maxgerhardt/tool-openocd-silabs.git#mac"
+    }
+    silabs_simplicitycommander = {
+        # Windows
+        "windows_amd64": "https://github.com/maxgerhardt/tool-simplicitycommander.git#windows_x64",
+        # No Windows ARM64 or ARM32 builds.
+        # Linux
+        "linux_x86_64": "https://github.com/maxgerhardt/tool-simplicitycommander.git#linux_x64",
+        # no other linux builds
+        # Mac (Intel and ARM are separate)
+        "darwin_x86_64": "https://github.com/maxgerhardt/tool-simplicitycommander.git#mac",
+        "darwin_arm64": "https://github.com/maxgerhardt/tool-simplicitycommander.git#mac"
     }
     def is_embedded(self):
         return True
@@ -56,6 +67,10 @@ class Siliconlabsefm32Platform(PlatformBase):
         if "tool-openocd-silabs" in self.packages and sys_type in Siliconlabsefm32Platform.silabs_openocd:
             self.packages["tool-openocd-silabs"]["version"] = Siliconlabsefm32Platform.silabs_openocd[sys_type]
 
+        default_protocol = board_config.get("upload.protocol") or ""
+        if variables.get("upload_protocol", default_protocol) == "simplicitycommander":
+            self.packages["tool-simplicitycommander"]["optional"] = False
+
         # configure J-LINK tool
         jlink_conds = [
             "jlink" in variables.get(option, "")
@@ -69,6 +84,20 @@ class Siliconlabsefm32Platform(PlatformBase):
         jlink_pkgname = "tool-jlink"
         if not any(jlink_conds) and jlink_pkgname in self.packages:
             del self.packages[jlink_pkgname]
+
+        # throw out OpenOCD package if not needed
+        openocd_conds = [
+            "cmsis-dap" in variables.get(option, "")
+            for option in ("upload_protocol", "debug_tool")
+        ]
+        if board:
+            openocd_conds.extend([
+                "cmsis-dap" in board_config.get(key, "")
+                for key in ("debug.default_tools", "upload.protocol")
+            ])
+        openocd_pkgname = "tool-openocd-silabs"
+        if not any(openocd_conds) and openocd_pkgname in self.packages:
+            del self.packages[openocd_pkgname]
 
         return super().configure_default_packages(variables, targets)
 
