@@ -111,7 +111,7 @@ env.Append(
         ("OPENTHREAD_CONFIG_LOG_OUTPUT", "OPENTHREAD_CONFIG_LOG_OUTPUT_APP"),
         ("SL_STATUS_LED", 0),
         ("_WANT_REENT_SMALL", 1),
-        ("CHIP_ADDRESS_RESOLVE_IMPL_INCLUDE_HEADER", "<lib/address_resolve/AddressResolve_DefaultImpl.h>"),
+        ("CHIP_ADDRESS_RESOLVE_IMPL_INCLUDE_HEADER", env.StringifyMacro("lib/address_resolve/AddressResolve_DefaultImpl.h")),
         ("CHIP_HAVE_CONFIG_H", 1),
         ("CURRENT_TIME_NOT_IMPLEMENTED", 1),
         ("SILABS_OTA_ENABLED", 1),
@@ -139,9 +139,9 @@ env.Append(
         ("SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE", env.StringifyMacro("sl_openthread_features_config.h")),
         ("BUFFER_SIZE_DOWN", 0),
         ("BUFFER_SIZE_UP", 768),
-        ("MBEDTLS_PSA_CRYPTO_CONFIG_FILE", "<psa_crypto_config.h>"),
+        ("MBEDTLS_PSA_CRYPTO_CONFIG_FILE", env.StringifyMacro("psa_crypto_config.h")),
         ("SL_RAIL_LIB_MULTIPROTOCOL_SUPPORT", 1),
-        ("SL_RAIL_UTIL_PA_CONFIG_HEADER", "<sl_rail_util_pa_config.h>"),
+        ("SL_RAIL_UTIL_PA_CONFIG_HEADER", env.StringifyMacro("sl_rail_util_pa_config.h")),
         ("SL_OPENTHREAD_CUSTOM_CLI_ENABLE", 1),
         ("SLI_RADIOAES_REQUIRES_MASKING", 1),
         ("configNUM_USER_THREAD_LOCAL_STORAGE_POINTERS", 0),
@@ -170,8 +170,7 @@ env.Append(
 
     CPPPATH=[
         join(FRAMEWORK_DIR, "cores", "silabs"),
-        join(FRAMEWORK_DIR, "extra", "core-api"),
-        join(FRAMEWORK_DIR, "extra", "core-api", "api", "deprecated"),
+        join(FRAMEWORK_DIR, "cores", "silabs", "api", "deprecated"),
         join(VARIANT_DIR, "matter"),
         join(VARIANT_DIR, "matter", "autogen", "zap-generated"),
         join(VARIANT_DIR, "matter", "autogen", "zap-generated", "app"),
@@ -306,10 +305,5 @@ libs.append(
     env.BuildLibrary(
         join("$BUILD_DIR", "FrameworkArduino"),
         join(FRAMEWORK_DIR, "cores", board.get("build.core"))))
-
-libs.append(
-    env.BuildLibrary(
-        join("$BUILD_DIR", "FrameworkArduinoAPI"),
-        join(FRAMEWORK_DIR, "extra", "core-api", "api")))
 
 env.Prepend(LIBS=libs)
