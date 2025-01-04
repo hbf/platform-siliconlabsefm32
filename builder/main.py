@@ -197,7 +197,7 @@ elif upload_protocol.startswith("simplicitycommander"):
         UPLOADER="$COMMANDERPATH",
         UPLOADERFLAGS=[
         ],
-        UPLOADCMD="$UPLOADER $UPLOADERFLAGS flash $BUILD_DIR/${PROGNAME}.elf --identifybyserialport $UPLOAD_PORT"
+        UPLOADCMD="$UPLOADER $UPLOADERFLAGS flash $SOURCE --identifybyserialport $UPLOAD_PORT"
     )
     upload_source = target_elf
     upload_actions = [
