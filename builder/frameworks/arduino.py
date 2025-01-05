@@ -41,9 +41,11 @@ wanted_stack = "matter"
 stack_includes = []
 stack_linkerscript = ""
 stack_libs = []
+gsdk_archive = ""
 
 # load generic extra flags from board
 env.ProcessFlags(board.get("build.arduino.extra_flags", ""))
+env.ProcessFlags(board.get("build.arduino.board_specific_macros", ""))
 
 cpp_defines = env.Flatten(env.get("CPPDEFINES", []))
 if "PIO_FRAMEWORK_ARDUINO_STACK_MATTER" in cpp_defines:
@@ -58,7 +60,8 @@ elif "PIO_FRAMEWORK_ARDUINO_STACK_BLE_SILABS" in cpp_defines:
 if wanted_stack == "matter":
     stack_linkerscript = join(VARIANT_DIR, "matter", "linkerfile.ld")
     env.ProcessFlags(board.get("build.arduino.matter_flags", ""))
-    stack_libs.append(File(join(VARIANT_DIR, "matter", "gsdk.a")))
+    # Note: GSDK is special, needs to be included as a whole archive, otherwise build is broken.
+    gsdk_archive = str(File(join(VARIANT_DIR, wanted_stack, "gsdk.a")))
     stack_libs.extend([File(join(VARIANT_DIR, "matter", lib)) for lib in board.get("build.arduino.matter_libs", "").split(" ")])
     # matter include directories are the same for all variants, no need to store them in the board file
     stack_includes = [
@@ -220,6 +223,11 @@ env.Append(
         "-Wl,--gc-sections",
         "-Wl,--no-warn-rwx-segments",
         '-Wl,-Map="%s"' % join("${BUILD_DIR}", "${PROGNAME}.map"),
+        # GSDK is special, all symbols required with core.
+        "-Wl,--whole-archive",
+        '"%s"' % join("${BUILD_DIR}", "libFrameworkArduino.a"),
+        '"%s"' % gsdk_archive,
+        "-Wl,--no-whole-archive",
     ],
 
     CPPDEFINES=[
@@ -229,12 +237,12 @@ env.Append(
         "ARDUINO_ARCH_SILABS",
     ],
 
-    LIBS=[
+    LIBS=stack_libs +[
         "stdc++",
         "gcc",
         "c",
         "m",
-    ] + stack_libs,
+    ],
 
     LIBSOURCE_DIRS=[
         join(FRAMEWORK_DIR, "libraries")
@@ -245,10 +253,6 @@ env.Append(
         join(FRAMEWORK_DIR, "cores", "silabs", "api", "deprecated"),
     ] + stack_includes
 )
-
-# Framework requires all symbols from mbed libraries
-#env.Prepend(_LIBFLAGS="-Wl,--whole-archive ")
-#env.Append(_LIBFLAGS=" -Wl,--no-whole-archive -lstdc++ -lm -lc -lgcc -lnosys")
 
 if not board.get("build.ldscript", ""):
     env.Replace(LDSCRIPT_PATH=stack_linkerscript)
