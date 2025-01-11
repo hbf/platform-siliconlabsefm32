@@ -67,13 +67,13 @@
       "type": "uploader",
       "optional": true,
       "owner": "maxgerhardt",
-      "version": "https://github.com/maxgerhardt/tool-openocd-silabs.git#windows_x64"
+      "version": "https://github.com/maxgerhardt/tool-openocd-silabs.git#mac"
     },
     "tool-simplicitycommander": {
       "type": "uploader",
       "optional": true,
       "owner": "maxgerhardt",
-      "version": "https://github.com/maxgerhardt/tool-simplicitycommander.git#windows_x64"
+      "version": "https://github.com/maxgerhardt/tool-simplicitycommander.git#mac"
     },
     "tool-cmake": {
       "optional": true,
